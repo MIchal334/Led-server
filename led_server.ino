@@ -1,7 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ArduinoJson.h>
-#include "chaneg_mode.h"
+#include "change_mode.h"
+#include <functional>
 
 const char *ssid = "TP-Link_D2C2";
 const char *password = "08275929";
@@ -9,14 +10,27 @@ ESP8266WebServer server(8080);
 IPAddress ip(192, 168, 0, 177); 
 
 
+void empty(){
+}
+
+std::function<void()> currentFunction = empty ;
+
+
+
+void test(){
+  Serial.println("TEST");
+}
+
 void handleConfig() {
-  ChangeMode mode1("test1",1);
+  std::function<void()> functionTest = test;
+  ChangeMode mode1("test1",1,functionTest);
   DynamicJsonDocument json_mode = mode1.toJson();
-  
+
   String response;
   serializeJsonPretty(json_mode, response);
 
   server.send(200, "application/json", response);
+  currentFunction = mode1.getFunction();
 }
 
 
@@ -86,5 +100,6 @@ void setup() {
 void loop() {
   // Serial.println(WiFi.localIP());
   server.handleClient();
+  currentFunction();
   delay(1000);
 }

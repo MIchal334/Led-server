@@ -1,26 +1,27 @@
-#include "Arduino.h"
-#include "chaneg_mode.h"
-#include <ArduinoJson.h>
+#include "change_mode.h"
 
-ChangeMode::ChangeMode(String optionName,int changeModeServerId)
-{
-  this->optionName = optionName;
-  this->changeModeServerId = changeModeServerId;
-}
+ChangeMode::ChangeMode(String optionName, int changeModeServerId, const std::function<void()>& function)
+    : optionName(optionName), changeModeServerId(changeModeServerId), changeFunction(function) {}
 
 String ChangeMode::getOptionName()
 {
-  return this->optionName;
+    return this->optionName;
 }
 
-int ChangeMode::getchangeModeServerId()
+int ChangeMode::getChangeModeServerId()
 {
-  return this->changeModeServerId;
+    return this->changeModeServerId;
 }
 
-DynamicJsonDocument ChangeMode::toJson(){
-  DynamicJsonDocument doc(200);
-  doc["optionName"] = this->optionName;
-  doc["changeModeServerId"] = this->changeModeServerId;
-  return doc;
+std::function<void()> ChangeMode::getFunction()
+{
+    return changeFunction;
+}
+
+DynamicJsonDocument ChangeMode::toJson()
+{
+    DynamicJsonDocument doc(200);
+    doc["optionName"] = this->optionName;
+    doc["changeModeServerId"] = this->changeModeServerId;
+    return doc;
 }
