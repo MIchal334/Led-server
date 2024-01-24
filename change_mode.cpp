@@ -15,7 +15,7 @@ int ChangeMode::getChangeModeServerId()
 
 std::function<void()> ChangeMode::getFunction()
 {
-    return changeFunction;
+  return changeFunction;
 }
 
 DynamicJsonDocument ChangeMode::toJson()

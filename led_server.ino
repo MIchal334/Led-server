@@ -3,6 +3,7 @@
 #include <ArduinoJson.h>
 #include "change_mode.h"
 #include <functional>
+#include "change_mode_list.h"
 
 const char *ssid = "TP-Link_D2C2";
 const char *password = "08275929";
@@ -17,20 +18,16 @@ std::function<void()> currentFunction = empty ;
 
 
 
-void test(){
-  Serial.println("TEST");
-}
-
 void handleConfig() {
-  std::function<void()> functionTest = test;
-  ChangeMode mode1("test1",1,functionTest);
-  DynamicJsonDocument json_mode = mode1.toJson();
+  ChangeModeList changeModeListObj;
+  std::vector<ChangeMode> changeModeList  = changeModeListObj.getChangeList();
+  DynamicJsonDocument json_mode = changeModeList[0].toJson();
 
   String response;
   serializeJsonPretty(json_mode, response);
 
   server.send(200, "application/json", response);
-  currentFunction = mode1.getFunction();
+  currentFunction = changeModeList[0].getFunction();
 }
 
 
