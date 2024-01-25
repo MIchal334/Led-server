@@ -9,6 +9,9 @@ std::vector<LedMode> LedModeList::getModeList() {
     std::vector<LedMode> listMode;
     std::function<void()> changeFunction = std::bind(&LedModeList::modeFunction, this);
     LedMode mode1("test1", 1, true, changeFunction);
+    LedMode mode2("test2", 1, true, changeFunction);
     listMode.push_back(mode1);
+    listMode.push_back(mode2);
+
     return listMode;
 }

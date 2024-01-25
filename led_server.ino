@@ -29,42 +29,9 @@ void handleConfig() {
 }
 
 
-// void handleTest() {
-  
-// if (true) {
-
-//     String jsonString = server.arg(0);
-
-//     Serial.println(jsonString);
-//     StaticJsonDocument<200> doc;
-//     DeserializationError error = deserializeJson(doc, jsonString);
-
-//     if (error) {
-//       server.send(400, "text/html", "Error parsing JSON");
-//     } else {
-      
-//       std::vector<String> list; 
-
-//       String name = doc["name"].as<String>();
-      
-//       JsonArray listArray = doc["list"].as<JsonArray>();
-//       for (JsonVariant value : listArray) {
-//         list.push_back(value.as<String>());
-//       }
-
-//       Test testObject(name,list);
-
-//       String response = "Name: " + testObject.getName() + ", List: ";
-//       for (const auto &item : testObject.getList()) {
-//         response += item + " ";
-//       }
-
-//       server.send(200, "text/html", response);
-//     }
-//   } else {
-//     server.send(400, "text/html", "Missing JSON data");
-//   }
-// }
+void handleTest() {
+  server.send(200, "application/json");
+}
 
 
 
@@ -88,6 +55,9 @@ void setup() {
   // server.on("/test", HTTP_POST, handleTest);
 
   server.on("/config", HTTP_GET, handleConfig);
+  server.on("/test", HTTP_GET, handleTest);
+
+
   server.begin();
 
 }
