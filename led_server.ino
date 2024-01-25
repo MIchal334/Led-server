@@ -3,7 +3,7 @@
 #include <ArduinoJson.h>
 #include "change_mode.h"
 #include <functional>
-#include "led_mode_list.h"
+#include "server_config.h"
 
 const char *ssid = "TP-Link_D2C2";
 const char *password = "08275929";
@@ -19,15 +19,13 @@ std::function<void()> currentFunction = empty ;
 
 
 void handleConfig() {
-  LedModeList ledModeListObj;
-  std::vector<LedMode> ledModeList  = ledModeListObj.getModeList();
-  DynamicJsonDocument json_mode = ledModeList[0].toJson();
+  ServerConfig server_config;
+  DynamicJsonDocument server_config_json  = server_config.getServerConfigInJson();
 
   String response;
-  serializeJsonPretty(json_mode, response);
+  serializeJsonPretty(server_config_json, response);
 
   server.send(200, "application/json", response);
-  currentFunction = ledModeList[0].getFunction();
 }
 
 
