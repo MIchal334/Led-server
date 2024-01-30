@@ -4,9 +4,7 @@
 #include "change_mode.h"
 
 DynamicJsonDocument ServerConfig::getServerConfigInJson() {
-    LedModeList ledModeListObj;
-    std::vector<LedMode> ledModeList = ledModeListObj.getModeList();
-
+    std::vector<LedMode> ledModeList = LedModeList::getModeList();
     std::vector<ChangeMode> change_mode_list = ChangeModeList::get_change_list();
 
     DynamicJsonDocument json_config(512);

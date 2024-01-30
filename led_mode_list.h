@@ -4,13 +4,18 @@
 #include "Arduino.h"
 #include "led_mode.h"
 #include <vector>
+#include <functional>
+#include <optional>
 
 class LedModeList {
 private:
-    void modeFunction();
+    static void modeFunction();
+    static std::vector<LedMode> list_mode;
 
 public:
-    std::vector<LedMode> getModeList();
+    static std::vector<LedMode> getModeList();
+    static void prepare_list();
+    static std::optional<std::function<void()>> get_change_function_by_ID(int change_mode_id);
 };
 
 #endif

@@ -7,6 +7,7 @@
 #include "client_request.h"
 #include <optional>
 #include "change_mode_list.h"
+#include "change_mode.h"
 
 // const char *ssid = "TP-Link_D2C2";
 // const char *password = "08275929";
@@ -99,7 +100,7 @@ void run_change_mode(int change_mode_id){
 }
 
 void set_color(int red, int green, int blue){
-    Serial.println("SER COLOR");
+    Serial.println("SET COLOR");
 }
 
 
@@ -126,6 +127,7 @@ void setup() {
   server.begin();
 
   ChangeModeList::prepare_list();
+  LedModeList::prepare_list();
 
 }
 
