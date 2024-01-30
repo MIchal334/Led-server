@@ -1,13 +1,31 @@
 #include "change_mode_list.h"
+#include "change_mode.h"
 
-void ChangeModeList::mode1Function() {
+std::vector<ChangeMode> ChangeModeList::list_mode;
+
+void ChangeModeList::mode_1_Function() {
     Serial.println("MODE 1");
 }
 
-std::vector<ChangeMode> ChangeModeList::getChangeList() {
-    std::vector<ChangeMode> listMode;
-    std::function<void()> changeFunction = std::bind(&ChangeModeList::mode1Function, *this);
+void ChangeModeList::prepare_list() {
+    std::function<void()> changeFunction = []() {
+        ChangeModeList::mode_1_Function();
+    };
+
     ChangeMode mode1("test1", 1, changeFunction);
-    listMode.push_back(mode1);
-    return listMode;
+    ChangeModeList::list_mode.push_back(mode1);
+}
+
+std::vector<ChangeMode> ChangeModeList::get_change_list() {
+    Serial.println(ChangeModeList::list_mode.size());
+    return ChangeModeList::list_mode;
+}
+
+std::optional<std::function<void()>> ChangeModeList::get_change_function_by_ID(int change_mode_id) {
+    for (ChangeMode& change_mode : ChangeModeList::list_mode) {
+        if (change_mode.get_change_mode_server_id() == change_mode_id) {
+            return change_mode.get_function();
+        }
+    }
+    return std::nullopt;
 }

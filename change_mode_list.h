@@ -1,4 +1,3 @@
-// change_mode_list.h
 #ifndef CHANGE_MODE_LIST_H
 #define CHANGE_MODE_LIST_H
 
@@ -6,13 +5,17 @@
 #include "change_mode.h"
 #include <vector>
 #include <functional>
+#include <optional>
 
 class ChangeModeList {
 private:
-    void mode1Function();
+    static std::vector<ChangeMode> list_mode;
+    static void mode_1_Function();
 
 public:
-    std::vector<ChangeMode> getChangeList();
+    static std::vector<ChangeMode> get_change_list();
+    static std::optional<std::function<void()>> get_change_function_by_ID(int change_mode_id);
+    static void prepare_list();
 };
 
 #endif

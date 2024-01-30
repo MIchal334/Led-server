@@ -3,19 +3,19 @@
 ChangeMode::ChangeMode(String optionName, int changeModeServerId, const std::function<void()>& function)
     : optionName(optionName), changeModeServerId(changeModeServerId), changeFunction(function) {}
 
-String ChangeMode::getOptionName()
+String ChangeMode::get_option_name()
 {
     return this->optionName;
 }
 
-int ChangeMode::getChangeModeServerId()
+int ChangeMode::get_change_mode_server_id()
 {
     return this->changeModeServerId;
 }
 
-std::function<void()> ChangeMode::getFunction()
+std::function<void()> ChangeMode::get_function()
 {
-  return changeFunction;
+  return this->changeFunction;
 }
 
 DynamicJsonDocument ChangeMode::toJson()

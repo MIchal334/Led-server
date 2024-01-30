@@ -12,6 +12,5 @@ std::vector<LedMode> LedModeList::getModeList() {
     LedMode mode2("test2", 1, true, changeFunction);
     listMode.push_back(mode1);
     listMode.push_back(mode2);
-
     return listMode;
 }

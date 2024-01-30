@@ -4,6 +4,9 @@
 #include "change_mode.h"
 #include <functional>
 #include "server_config.h"
+#include "client_request.h"
+#include <optional>
+#include "change_mode_list.h"
 
 // const char *ssid = "TP-Link_D2C2";
 // const char *password = "08275929";
@@ -46,6 +49,60 @@ void led_off() {
 
 
 
+std::optional<ClientRequest> get_object_from_json() {
+  if (server.hasArg("plain")) {
+    String jsonString = server.arg("plain");
+    StaticJsonDocument<200> doc;
+    DeserializationError error = deserializeJson(doc, jsonString);
+    if (error) {
+      server.send(400, "text/html", "Error parsing JSON");
+    } else {
+      
+      int red_value = doc["redValue"].as<int>();
+      int blue_value = doc["blueValue"].as<int>();
+      int green_value = doc["greenValue"].as<int>();
+      int change_mode_id = doc["changeServerId"].as<int>();
+
+      Serial.println("NEW COLOR REQUEST");
+      Serial.println(blue_value);
+      server.send(201, "text/html");
+      return ClientRequest(red_value,blue_value, green_value,change_mode_id);
+    }
+  } else {
+    server.send(400, "text/html", "Missing JSON data");
+  }
+  return std::nullopt;
+}
+
+
+void set_new_color(){
+  std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
+  if (clientRequestOptional.has_value()) {
+      ClientRequest clientRequest = clientRequestOptional.value();
+      run_change_mode(clientRequest.get_change_mode_id());
+      set_color(clientRequest.get_red_value(),clientRequest.get_green_value(),clientRequest.get_blue_value());
+    } 
+}
+
+
+
+void run_change_mode(int change_mode_id){
+  
+  std::optional<std::function<void()>> change_function_optional = ChangeModeList::get_change_function_by_ID(change_mode_id);
+  
+  if (change_function_optional.has_value()) {
+    Serial.println("Changes found");
+    std::function<void()> change_function = change_function_optional.value();
+    change_function();
+  }
+
+}
+
+void set_color(int red, int green, int blue){
+    Serial.println("SER COLOR");
+}
+
+
 void setup() {
   Serial.begin(115200);
 
@@ -65,17 +122,15 @@ void setup() {
   server.on("/config", HTTP_GET, handle_config);
   server.on("/test", HTTP_GET, handle_test);
   server.on("/off", HTTP_PUT, led_off);
-
-  // server.on("/color", HTTP_GET, led_off);
-
-
-
+  server.on("/color", HTTP_POST, set_new_color);
   server.begin();
+
+  ChangeModeList::prepare_list();
 
 }
 
 void loop() {
-  Serial.println(WiFi.localIP());
+  // Serial.println(WiFi.localIP());
   server.handleClient();
   currentFunction();
   // delay(1000);
