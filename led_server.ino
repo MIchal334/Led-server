@@ -63,9 +63,6 @@ std::optional<ClientRequest> get_object_from_json() {
       int blue_value = doc["blueValue"].as<int>();
       int green_value = doc["greenValue"].as<int>();
       int change_mode_id = doc["changeServerId"].as<int>();
-
-      Serial.println("NEW COLOR REQUEST");
-      Serial.println(blue_value);
       server.send(201, "text/html");
       return ClientRequest(red_value,blue_value, green_value,change_mode_id);
     }
@@ -80,6 +77,7 @@ void set_new_color(){
   std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
   if (clientRequestOptional.has_value()) {
       ClientRequest clientRequest = clientRequestOptional.value();
+      currentFunction = empty;
       run_change_mode(clientRequest.get_change_mode_id());
       set_color(clientRequest.get_red_value(),clientRequest.get_green_value(),clientRequest.get_blue_value());
     } 
@@ -92,7 +90,6 @@ void run_change_mode(int change_mode_id){
   std::optional<std::function<void()>> change_function_optional = ChangeModeList::get_change_function_by_ID(change_mode_id);
   
   if (change_function_optional.has_value()) {
-    Serial.println("Changes found");
     std::function<void()> change_function = change_function_optional.value();
     change_function();
   }
@@ -103,6 +100,18 @@ void set_color(int red, int green, int blue){
     Serial.println("SET COLOR");
 }
 
+
+void run_led_mode(){
+  std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
+  if (clientRequestOptional.has_value()) {
+      ClientRequest clientRequest = clientRequestOptional.value();
+      std::optional<std::function<void()>> change_function_optional= LedModeList::get_change_function_by_ID(clientRequest.get_change_mode_id());
+      if (change_function_optional.has_value()) {
+        currentFunction = change_function_optional.value();
+      }
+
+    } 
+}
 
 void setup() {
   Serial.begin(115200);
@@ -124,6 +133,7 @@ void setup() {
   server.on("/test", HTTP_GET, handle_test);
   server.on("/off", HTTP_PUT, led_off);
   server.on("/color", HTTP_POST, set_new_color);
+  server.on("/mode", HTTP_POST, run_led_mode);
   server.begin();
 
   ChangeModeList::prepare_list();

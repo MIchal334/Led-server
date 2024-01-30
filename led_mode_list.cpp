@@ -11,8 +11,8 @@ void LedModeList::prepare_list() {
     std::function<void()> changeFunction = []() {
         LedModeList::modeFunction();
     };
-    LedMode mode1("test1", 1, true, changeFunction);
-    LedMode mode2("test2", 1, true, changeFunction);
+    LedMode mode1("test1", 1, false, changeFunction);
+    LedMode mode2("test2", 1, false, changeFunction);
     LedModeList::list_mode.push_back(mode1);
     LedModeList::list_mode.push_back(mode2);
 }
