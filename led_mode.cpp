@@ -1,6 +1,6 @@
 #include "led_mode.h"
 
-LedMode::LedMode(String optionName, int modeServerId, bool setColor, const std::function<void()>& function)
+LedMode::LedMode(String optionName, int modeServerId, bool setColor, const  std::function<std::map<int, Color>(int, int, int)> function)
     : optionName(optionName), modeServerId(modeServerId), setColor(setColor), modeFunction(function) {}
 
 String LedMode::getOptionName()
@@ -18,7 +18,7 @@ bool LedMode::isSetColor()
     return this->setColor;
 }
 
-std::function<void()> LedMode::getFunction()
+std::function<std::map<int, Color>(int, int, int)> LedMode::getFunction()
 {
     return modeFunction;
 }

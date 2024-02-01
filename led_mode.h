@@ -4,11 +4,13 @@
 #include <ArduinoJson.h>
 #include <functional>
 #include "Arduino.h"
+#include <map>
+#include "color.h"
 
 class LedMode {
 public:
-  LedMode(String optionName, int modeServerId, bool setColor, const std::function<void()>& function);
-  std::function<void()> getFunction();
+  LedMode(String optionName, int modeServerId, bool setColor, const  std::function<std::map<int, Color>(int, int, int)> function);
+  std::function<std::map<int, Color>(int, int, int)> getFunction();
   String getOptionName();
   int getModeServerId();
   bool isSetColor();
@@ -18,7 +20,7 @@ private:
   String optionName;
   int modeServerId;
   bool setColor;
-  std::function<void()> modeFunction;
+  std::function<std::map<int, Color>(int, int, int)> modeFunction;
 };
 
 #endif

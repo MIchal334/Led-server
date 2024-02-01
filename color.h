@@ -1,6 +1,9 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include <functional>
+#include <map>
+
 class Color {
 private:
     int red;
@@ -8,10 +11,9 @@ private:
     int blue;
 
 public:
-    // Konstruktor
     Color(int r, int g, int b);
+    Color() = default;
 
-    // Gettery
     int getRed() const;
     int getGreen() const;
     int getBlue() const;

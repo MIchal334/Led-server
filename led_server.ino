@@ -9,6 +9,7 @@
 #include "change_mode_list.h"
 #include "change_mode.h"
 #include <Adafruit_NeoPixel.h>
+#include "color.h"
 
 // const char *ssid = "TP-Link_D2C2";
 // const char *password = "08275929";
@@ -29,10 +30,12 @@ IPAddress ip(192, 168, 0, 177);
 
 
 
-void empty(){
+std::map<int, Color> empty(int a, int b, int c){
+  std::map<int, Color> result;
+  return result;
 }
 
-std::function<void()> currentFunction = empty ;
+std::function<std::map<int, Color>(int, int, int)> currentFunction = empty;
 
 
 
@@ -118,7 +121,7 @@ void run_led_mode(){
   std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
   if (clientRequestOptional.has_value()) {
       ClientRequest clientRequest = clientRequestOptional.value();
-      std::optional<std::function<void()>> change_function_optional= LedModeList::get_change_function_by_ID(clientRequest.get_change_mode_id());
+      std::optional<std::function<std::map<int, Color>(int, int, int)>> change_function_optional= LedModeList::get_change_function_by_ID(clientRequest.get_change_mode_id());
       if (change_function_optional.has_value()) {
         currentFunction = change_function_optional.value();
       }
@@ -157,6 +160,6 @@ void setup() {
 void loop() {
   // Serial.println(WiFi.localIP());
   server.handleClient();
-  currentFunction();
+  currentFunction(100,100,100);
   // delay(1000);
 }
