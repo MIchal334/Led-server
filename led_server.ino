@@ -96,20 +96,20 @@ void set_new_color(){
   if (clientRequestOptional.has_value()) {
       ClientRequest clientRequest = clientRequestOptional.value();
       currentFunction = empty;
-      run_change_mode(clientRequest.get_change_mode_id());
+      run_change_mode(clientRequest);
       set_color(clientRequest.get_red_value(),clientRequest.get_green_value(),clientRequest.get_blue_value());
     } 
 }
 
 
 
-void run_change_mode(int change_mode_id){
+void run_change_mode(ClientRequest clientRequest){
   
-  std::optional<std::function<void()>> change_function_optional = ChangeModeList::get_change_function_by_ID(change_mode_id);
+  std::optional<std::function<void(int,int,int,int)>> change_function_optional = ChangeModeList::get_change_function_by_ID(clientRequest.get_change_mode_id());
   
   if (change_function_optional.has_value()) {
-    std::function<void()> change_function = change_function_optional.value();
-    change_function();
+    std::function<void(int,int,int,int)> change_function = change_function_optional.value();
+    change_function(clientRequest.get_red_value(),clientRequest.get_green_value(),clientRequest.get_blue_value(),NUMPIXELS);
   }
 
 }

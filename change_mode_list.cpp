@@ -3,13 +3,13 @@
 
 std::vector<ChangeMode> ChangeModeList::list_mode;
 
-void ChangeModeList::mode_1_Function() {
+void ChangeModeList::mode_1_Function(int red_value, int green_value , int blue_value, int amount_led) {
     Serial.println("MODE 1");
 }
 
 void ChangeModeList::prepare_list() {
-    std::function<void()> changeFunction = []() {
-        ChangeModeList::mode_1_Function();
+    std::function<void(int, int, int, int)> changeFunction = [](int red_value, int green_value , int blue_value, int amount_led) {
+        ChangeModeList::mode_1_Function(red_value,green_value,blue_value,amount_led);
     };
 
     ChangeMode mode1("test1", 1, changeFunction);
@@ -21,7 +21,7 @@ std::vector<ChangeMode> ChangeModeList::get_change_list() {
     return ChangeModeList::list_mode;
 }
 
-std::optional<std::function<void()>> ChangeModeList::get_change_function_by_ID(int change_mode_id) {
+std::optional<std::function<void(int,int,int,int)>> ChangeModeList::get_change_function_by_ID(int change_mode_id) {
     for (ChangeMode& change_mode : ChangeModeList::list_mode) {
         if (change_mode.get_change_mode_server_id() == change_mode_id) {
             return change_mode.get_function();

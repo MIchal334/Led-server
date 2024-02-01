@@ -5,11 +5,12 @@
 #include <functional>
 #include "Arduino.h"
 #include <optional>
+#include <map>
 
 class ChangeMode {
 public:
-  ChangeMode(String optionName, int changeModeServerId, const std::function<void()>& function);
-  std::function<void()> get_function();
+  ChangeMode(String optionName, int changeModeServerId, const std::function<void(int, int, int,int)>& function);
+  std::function<void(int, int, int,int)> get_function();
   String get_option_name();
   int get_change_mode_server_id();
   DynamicJsonDocument toJson();
@@ -17,7 +18,7 @@ public:
 private:
   String optionName;
   int changeModeServerId;
-  std::function<void()> changeFunction;
+  std::function<void(int, int, int,int)> changeFunction;
 };
 
 #endif
