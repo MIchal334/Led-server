@@ -13,6 +13,10 @@
 // const char *ssid = "TP-Link_D2C2";
 // const char *password = "08275929";
 
+
+#define PIN           6  
+#define NUMPIXELS     100  
+
 const char *ssid = "tzg_dom_1";
 const char *password = "438865980";
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
@@ -21,8 +25,7 @@ ESP8266WebServer server(8080);
 IPAddress ip(192, 168, 0, 177); 
 
 
-#define PIN           6   // Definiuje pin, do którego podłączony jest pasek LED
-#define NUMPIXELS     100  // Określa liczbę pikseli na pasku LED
+
 
 
 
