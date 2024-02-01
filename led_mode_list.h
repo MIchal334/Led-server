@@ -11,13 +11,13 @@
 
 class LedModeList {
 private:
-    static std::map<int, Color> modeFunction(int red_value, int blue_value, int green_value);
+    static std::map<int, Color> ania_effect(int red_value, int blue_value, int green_value, int amount_led);
     static std::vector<LedMode> list_mode;
 
 public:
     static std::vector<LedMode> getModeList();
     static void prepare_list();
-    static std::optional<std::function<std::map<int, Color>(int, int, int)>> get_change_function_by_ID(int change_mode_id);
+    static std::optional<std::function<std::map<int, Color>(int, int, int,int)>> get_change_function_by_ID(int change_mode_id);
 };
 
 #endif

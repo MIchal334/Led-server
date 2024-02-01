@@ -23,19 +23,19 @@ const char *password = "438865980";
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 ESP8266WebServer server(8080);
-IPAddress ip(192, 168, 0, 177); 
+IPAddress ip(192, 168, 0, 177);
+
+int current_red_value = 0;
+int current_blue_value = 0;
+int current_green_value = 0;
 
 
-
-
-
-
-std::map<int, Color> empty(int a, int b, int c){
+std::map<int, Color> empty(int a, int b, int c, int d){
   std::map<int, Color> result;
   return result;
 }
 
-std::function<std::map<int, Color>(int, int, int)> currentFunction = empty;
+std::function<std::map<int, Color>(int, int, int, int)> currentFunction = empty;
 
 
 
@@ -58,6 +58,11 @@ void handle_test() {
 
 void led_off() {
   Serial.println("LED_OFF");
+  currentFunction = empty;
+  for(int i=0; i<strip.numPixels(); ++i){
+       strip.setPixelColor(i, strip.Color(0, 0, 0));
+    }
+    strip.show(); 
   server.send(204, "application/json");
 }
 
@@ -121,12 +126,27 @@ void run_led_mode(){
   std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
   if (clientRequestOptional.has_value()) {
       ClientRequest clientRequest = clientRequestOptional.value();
-      std::optional<std::function<std::map<int, Color>(int, int, int)>> change_function_optional= LedModeList::get_change_function_by_ID(clientRequest.get_change_mode_id());
+      std::optional<std::function<std::map<int, Color>(int, int, int, int)>> change_function_optional= LedModeList::get_change_function_by_ID(clientRequest.get_change_mode_id());
       if (change_function_optional.has_value()) {
         currentFunction = change_function_optional.value();
+        current_red_value = clientRequest.get_red_value();
+        current_blue_value = clientRequest.get_blue_value();
+        current_green_value = clientRequest.get_green_value();
       }
 
     } 
+}
+
+void turn_of_led_mode_color(std::map<int, Color> led_result_map){
+    for (const auto& pair : led_result_map) {
+      strip.setPixelColor(pair.first, strip.Color(pair.second.getRed(), pair.second.getBlue(), pair.second.getGreen()));
+      if (pair.first == 10){
+      Serial.print("RED: ");
+      Serial.print(pair.second.getRed());
+      Serial.println();
+      }
+
+    }
 }
 
 void setup() {
@@ -159,7 +179,11 @@ void setup() {
 
 void loop() {
   // Serial.println(WiFi.localIP());
+  
   server.handleClient();
-  currentFunction(100,100,100);
-  // delay(1000);
+  std::map<int, Color> led_result_map = currentFunction(current_red_value,current_blue_value,current_green_value,NUMPIXELS);
+  if(led_result_map.size() > 0 ){
+      turn_of_led_mode_color(led_result_map);
+  }
+
 }

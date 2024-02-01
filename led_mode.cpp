@@ -1,6 +1,6 @@
 #include "led_mode.h"
 
-LedMode::LedMode(String optionName, int modeServerId, bool setColor, const  std::function<std::map<int, Color>(int, int, int)> function)
+LedMode::LedMode(String optionName, int modeServerId, bool setColor, const  std::function<std::map<int, Color>(int, int, int,int)> function)
     : optionName(optionName), modeServerId(modeServerId), setColor(setColor), modeFunction(function) {}
 
 String LedMode::getOptionName()
@@ -18,9 +18,9 @@ bool LedMode::isSetColor()
     return this->setColor;
 }
 
-std::function<std::map<int, Color>(int, int, int)> LedMode::getFunction()
+std::function<std::map<int, Color>(int, int, int,int)> LedMode::getFunction()
 {
-    return modeFunction;
+  return modeFunction;
 }
 
 DynamicJsonDocument LedMode::toJson()
