@@ -1,23 +1,34 @@
 #include "change_mode_list.h"
 #include "change_mode.h"
+#include "led_config.h"
 
 std::vector<ChangeMode> ChangeModeList::list_mode;
 
-void ChangeModeList::mode_1_Function(int red_value, int green_value , int blue_value, int amount_led) {
-    Serial.println("MODE 1");
+void ChangeModeList::wunsz(int red_value, int green_value , int blue_value, int amount_led) {
+  for (int i = 0; i < amount_led; i++) {
+    int j = amount_led - i;
+    LedConfig::getStrip().setPixelColor(i, red_value, green_value, blue_value);
+    LedConfig::getStrip().setPixelColor(j, red_value, green_value, blue_value);
+    LedConfig::getStrip().setPixelColor(i - 7, 0, 0, 0);
+    LedConfig::getStrip().setPixelColor(j + 7, 0, 0, 0);
+    LedConfig::getStrip().show();
+    delay (50);
+  }
+}
+
+ChangeMode ChangeModeList::wunsz_mode_creator() {
+    std::function<void(int, int, int, int)> changeFunction = [](int red_value, int green_value , int blue_value, int amount_led) {
+        ChangeModeList::wunsz(red_value,green_value,blue_value,amount_led);
+    };
+    ChangeMode wunsz_mode("Wunsz", 1, changeFunction);
+    return wunsz_mode;
 }
 
 void ChangeModeList::prepare_list() {
-    std::function<void(int, int, int, int)> changeFunction = [](int red_value, int green_value , int blue_value, int amount_led) {
-        ChangeModeList::mode_1_Function(red_value,green_value,blue_value,amount_led);
-    };
-
-    ChangeMode mode1("test1", 1, changeFunction);
-    ChangeModeList::list_mode.push_back(mode1);
+  ChangeModeList::list_mode.push_back(wunsz_mode_creator());
 }
 
 std::vector<ChangeMode> ChangeModeList::get_change_list() {
-    Serial.println(ChangeModeList::list_mode.size());
     return ChangeModeList::list_mode;
 }
 

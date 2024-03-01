@@ -10,17 +10,18 @@
 #include "change_mode.h"
 #include <Adafruit_NeoPixel.h>
 #include "color.h"
+#include "led_config.h"
 
 // const char *ssid = "TP-Link_D2C2";
 // const char *password = "08275929";
 
 
-#define PIN           6  
-#define NUMPIXELS     100  
+  
+int led_amount;  
 
 const char *ssid = "tzg_dom_1";
 const char *password = "438865980";
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip ; 
 
 ESP8266WebServer server(8080);
 IPAddress ip(192, 168, 0, 177);
@@ -109,7 +110,7 @@ void run_change_mode(ClientRequest clientRequest){
   
   if (change_function_optional.has_value()) {
     std::function<void(int,int,int,int)> change_function = change_function_optional.value();
-    change_function(clientRequest.get_red_value(),clientRequest.get_green_value(),clientRequest.get_blue_value(),NUMPIXELS);
+    change_function(clientRequest.get_red_value(),clientRequest.get_green_value(),clientRequest.get_blue_value(),strip.numPixels());
   }
 
 }
@@ -169,13 +170,13 @@ void setup() {
 
   ChangeModeList::prepare_list();
   LedModeList::prepare_list();
+  Adafruit_NeoPixel strip = LedConfig::getStrip();
 
 }
 
 void loop() {
-  // Serial.println(WiFi.localIP());
   server.handleClient();
-  std::map<int, Color> led_result_map = currentFunction(current_red_value,current_blue_value,current_green_value,NUMPIXELS);
+  std::map<int, Color> led_result_map = currentFunction(current_red_value,current_blue_value,current_green_value,strip.numPixels());
   if(led_result_map.size() > 0 ){
       turn_on_led_mode_color(led_result_map);
   }

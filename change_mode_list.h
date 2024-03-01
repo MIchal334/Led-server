@@ -10,7 +10,8 @@
 class ChangeModeList {
 private:
     static std::vector<ChangeMode> list_mode;
-    static void mode_1_Function(int red_value, int green_value , int blue_value, int amount_led);
+    static void wunsz(int red_value, int green_value , int blue_value, int amount_led);
+    static ChangeMode wunsz_mode_creator();
 
 public:
     static std::vector<ChangeMode> get_change_list();

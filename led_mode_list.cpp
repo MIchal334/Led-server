@@ -84,13 +84,13 @@ LedMode LedModeList::rainbow_effect_creator(){
     };
 
     LedMode rainbow_effect_mode("Tęcza", 2, false, modeFunction);
-    return ania_effect_mode;
+    return rainbow_effect_mode;
 }
 
 
 void LedModeList::prepare_list() {
     LedModeList::list_mode.push_back(ania_effect_creator());
-    LedModeList::list_mode.push_back(rainbow_effect_mode());
+    LedModeList::list_mode.push_back(rainbow_effect_creator());
 }
 
 std::vector<LedMode> LedModeList::getModeList() {
