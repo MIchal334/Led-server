@@ -1,3 +1,4 @@
+#include <cstdint>
 #include "change_mode_list.h"
 #include "change_mode.h"
 #include "led_config.h"
@@ -16,6 +17,25 @@ void ChangeModeList::wunsz(int red_value, int green_value , int blue_value, int 
   }
 }
 
+void ChangeModeList::protektor(int red_value, int green_value , int blue_value, int amount_led) {
+  for ( int j = 0; j < 15; j++) {
+    uint32_t color = randomColor();
+    LedConfig::getStrip().clear();
+    LedConfig::getStrip().show();
+    delay (50);
+    for (int i = 0; i < amount_led; i++) {
+      LedConfig::getStrip().setPixelColor(i, color);
+    }
+    LedConfig::getStrip().show();
+    delay(100);
+  }
+}
+
+
+uint32_t ChangeModeList::randomColor() {
+  return LedConfig::getStrip().Color(random(0, 255), random(0, 255), random(0, 255));
+}
+
 ChangeMode ChangeModeList::wunsz_mode_creator() {
     std::function<void(int, int, int, int)> changeFunction = [](int red_value, int green_value , int blue_value, int amount_led) {
         ChangeModeList::wunsz(red_value,green_value,blue_value,amount_led);
@@ -24,8 +44,19 @@ ChangeMode ChangeModeList::wunsz_mode_creator() {
     return wunsz_mode;
 }
 
+
+
+ChangeMode ChangeModeList::prot_mode_creator() {
+    std::function<void(int, int, int, int)> changeFunction = [](int red_value, int green_value , int blue_value, int amount_led) {
+        ChangeModeList::protektor(red_value,green_value,blue_value,amount_led);
+    };
+    ChangeMode protektor_mode("Prot", 2, changeFunction);
+    return protektor_mode;
+}
+
 void ChangeModeList::prepare_list() {
   ChangeModeList::list_mode.push_back(wunsz_mode_creator());
+  ChangeModeList::list_mode.push_back(prot_mode_creator());
 }
 
 std::vector<ChangeMode> ChangeModeList::get_change_list() {
