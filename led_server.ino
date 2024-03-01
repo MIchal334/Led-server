@@ -137,16 +137,11 @@ void run_led_mode(){
     } 
 }
 
-void turn_of_led_mode_color(std::map<int, Color> led_result_map){
+void turn_on_led_mode_color(std::map<int, Color> led_result_map){
     for (const auto& pair : led_result_map) {
       strip.setPixelColor(pair.first, strip.Color(pair.second.getRed(), pair.second.getBlue(), pair.second.getGreen()));
-      if (pair.first == 10){
-      Serial.print("RED: ");
-      Serial.print(pair.second.getRed());
-      Serial.println();
-      }
-
     }
+    strip.show();
 }
 
 void setup() {
@@ -179,11 +174,9 @@ void setup() {
 
 void loop() {
   // Serial.println(WiFi.localIP());
-  
   server.handleClient();
   std::map<int, Color> led_result_map = currentFunction(current_red_value,current_blue_value,current_green_value,NUMPIXELS);
   if(led_result_map.size() > 0 ){
-      turn_of_led_mode_color(led_result_map);
+      turn_on_led_mode_color(led_result_map);
   }
-
 }

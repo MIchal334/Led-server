@@ -13,6 +13,10 @@ class LedModeList {
 private:
     static std::map<int, Color> ania_effect(int red_value, int blue_value, int green_value, int amount_led);
     static std::vector<LedMode> list_mode;
+    static LedMode ania_effect_creator();
+    static std::map<int, Color> rainbow(int red_value, int green_value , int blue_value, int amount_led);
+    static Color wheel(byte WheelPos);
+    static LedMode rainbow_effect_creator();
 
 public:
     static std::vector<LedMode> getModeList();
