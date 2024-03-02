@@ -1,4 +1,3 @@
-// led_config.h
 #ifndef LED_CONFIG_H
 #define LED_CONFIG_H
 
@@ -9,7 +8,7 @@
 
 class LedConfig {
 private:
-    static Adafruit_NeoPixel* strip;
+    static Adafruit_NeoPixel strip;
 
 public:
     static Adafruit_NeoPixel& getStrip();

@@ -9,8 +9,8 @@
 
 class LedMode {
 public:
-  LedMode(String optionName, int modeServerId, bool setColor, const  std::function<std::map<int, Color>(int, int, int,int)> function);
-  std::function<std::map<int, Color>(int, int, int,int)> getFunction();
+  LedMode(String optionName, int modeServerId, bool setColor, const  std::function<std::map<int, uint32_t>(int, int, int,int)> function);
+  std::function<std::map<int, uint32_t>(int, int, int,int)> getFunction();
   String getOptionName();
   int getModeServerId();
   bool isSetColor();
@@ -20,7 +20,7 @@ private:
   String optionName;
   int modeServerId;
   bool setColor;
-  std::function<std::map<int, Color>(int, int, int,int)> modeFunction;
+  std::function<std::map<int, uint32_t>(int, int, int,int)> modeFunction;
 };
 
 #endif

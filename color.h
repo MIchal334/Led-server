@@ -1,3 +1,4 @@
+#include "spiffs/spiffs_config.h"
 #ifndef COLOR_H
 #define COLOR_H
 
@@ -17,6 +18,7 @@ public:
     int getRed() const;
     int getGreen() const;
     int getBlue() const;
+    uint32_t toStripColor();
 };
 
 #endif

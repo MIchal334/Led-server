@@ -16,11 +16,12 @@
 // const char *password = "08275929";
 
 
+const char *ssid = "NETIASPOT-2.4GHz-u5sK";
+const char *password = "x4vt62TT";
   
-int led_amount;  
 
-const char *ssid = "tzg_dom_1";
-const char *password = "438865980";
+// const char *ssid = "tzg_dom_1";
+// const char *password = "438865980";
 Adafruit_NeoPixel strip ; 
 
 ESP8266WebServer server(8080);
@@ -31,12 +32,12 @@ int current_blue_value = 0;
 int current_green_value = 0;
 
 
-std::map<int, Color> empty(int a, int b, int c, int d){
-  std::map<int, Color> result;
+std::map<int, uint32_t> empty(int a, int b, int c, int d){
+  std::map<int, uint32_t> result;
   return result;
 }
 
-std::function<std::map<int, Color>(int, int, int, int)> currentFunction = empty;
+std::function<std::map<int, uint32_t>(int, int, int, int)> currentFunction = empty;
 
 
 
@@ -116,6 +117,7 @@ void run_change_mode(ClientRequest clientRequest){
 }
 
 void set_color(int red, int green, int blue){
+   Serial.println("SET NEW COLOR ");
     for(int i=0; i<strip.numPixels(); ++i){
        strip.setPixelColor(i, strip.Color(red, blue, green));
     }
@@ -127,7 +129,7 @@ void run_led_mode(){
   std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
   if (clientRequestOptional.has_value()) {
       ClientRequest clientRequest = clientRequestOptional.value();
-      std::optional<std::function<std::map<int, Color>(int, int, int, int)>> change_function_optional= LedModeList::get_change_function_by_ID(clientRequest.get_change_mode_id());
+      std::optional<std::function<std::map<int, uint32_t>(int, int, int, int)>> change_function_optional= LedModeList::get_change_function_by_ID(clientRequest.get_change_mode_id());
       if (change_function_optional.has_value()) {
         currentFunction = change_function_optional.value();
         current_red_value = clientRequest.get_red_value();
@@ -138,9 +140,9 @@ void run_led_mode(){
     } 
 }
 
-void turn_on_led_mode_color(std::map<int, Color> led_result_map){
+void turn_on_led_mode_color(std::map<int, uint32_t> led_result_map){
     for (const auto& pair : led_result_map) {
-      strip.setPixelColor(pair.first, strip.Color(pair.second.getRed(), pair.second.getBlue(), pair.second.getGreen()));
+      strip.setPixelColor(pair.first, pair.second);
     }
     strip.show();
 }
@@ -170,13 +172,14 @@ void setup() {
 
   ChangeModeList::prepare_list();
   LedModeList::prepare_list();
-  Adafruit_NeoPixel strip = LedConfig::getStrip();
+  Serial.println("Watiing for strip");
+  strip = LedConfig::getStrip();
 
 }
 
 void loop() {
   server.handleClient();
-  std::map<int, Color> led_result_map = currentFunction(current_red_value,current_blue_value,current_green_value,strip.numPixels());
+  std::map<int, uint32_t> led_result_map = currentFunction(current_red_value,current_blue_value,current_green_value,strip.numPixels());
   if(led_result_map.size() > 0 ){
       turn_on_led_mode_color(led_result_map);
   }
