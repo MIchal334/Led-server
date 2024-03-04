@@ -39,9 +39,11 @@ std::map<int, uint32_t> empty(int a, int b, int c, int d){
 }
 
 std::function<std::map<int, uint32_t>(int, int, int, int)> currentFunction = empty;
+std::function<std::map<int, uint32_t>(int,int,int,int)> current_change_mode_function = empty;
 
 bool run_new_color;
 bool is_started;
+bool run_change_mode;
 
 void handle_config() {
   ServerConfig server_config;
@@ -102,30 +104,34 @@ void handle_new_color_endpoint(){
       current_red_value = clientRequest.get_red_value();
       current_blue_value = clientRequest.get_blue_value();
       current_green_value = clientRequest.get_green_value();
-      current_change_mode_id = clientRequest.get_change_mode_id();
-      run_new_color = true;
+      std::optional<std::function<std::map<int, uint32_t>(int, int, int, int)>> change_function_optional = ChangeModeList::get_change_function_by_ID(clientRequest.get_change_mode_id());
+      if (change_function_optional.has_value()) {
+        current_change_mode_function = change_function_optional.value();
+      }
+      run_change_mode = true;
+      strip.clear();
     }
     clientRequestOptional = std::nullopt; 
 }
 
-void set_new_color(int red, int green, int blue,int change_mode_id){
-    strip.clear();
-    run_change_mode(red,green,blue,change_mode_id);
-    set_color(red,green,blue);
-}
+// void set_new_color(int red, int green, int blue,int change_mode_id){
+    
+//     run_change_mode(red,green,blue,change_mode_id);
+//     set_color(red,green,blue);
+// }
 
 
 
-void run_change_mode(int red, int green, int blue, int change_mode_id){
+// void run_change_mode(int red, int green, int blue, int change_mode_id){
   
-  std::optional<std::function<void(int,int,int,int)>> change_function_optional = ChangeModeList::get_change_function_by_ID(change_mode_id);
+//   std::optional<std::function<void(int,int,int,int)>> change_function_optional = ChangeModeList::get_change_function_by_ID(change_mode_id);
   
-  if (change_function_optional.has_value()) {
-    std::function<void(int,int,int,int)> change_function = change_function_optional.value();
-    change_function(red,green,blue,strip.numPixels());
-  }
+//   if (change_function_optional.has_value()) {
+//     std::function<void(int,int,int,int)> change_function = change_function_optional.value();
+//     change_function(red,green,blue,strip.numPixels());
+//   }
 
-}
+// }
 
 void set_color(int red, int green, int blue){
     for(int i=0; i<strip.numPixels(); ++i){
@@ -141,6 +147,7 @@ void run_led_mode(){
   std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
   if (clientRequestOptional.has_value()) {
       run_new_color = false;
+      current_change_mode_function = empty;
       ClientRequest clientRequest = clientRequestOptional.value();
       std::optional<std::function<std::map<int, uint32_t>(int, int, int, int)>> change_function_optional= LedModeList::get_change_function_by_ID(clientRequest.get_change_mode_id());
       if (change_function_optional.has_value()) {
@@ -187,6 +194,7 @@ void start(){
 
 void setup() {
   run_new_color = false;
+  run_change_mode = false;
   Serial.begin(115200);
   pinMode(PIN, OUTPUT);
 
@@ -217,6 +225,7 @@ void setup() {
   strip.begin();
   delay(400);
   is_started = false;
+  
 }
 
 void loop() {
@@ -229,8 +238,18 @@ void loop() {
   if(led_result_map.size() > 0 ){
       turn_on_led_mode_color(led_result_map);
   }
+
+  if (run_change_mode){
+  std::map<int, uint32_t> change_result_map = current_change_mode_function(current_red_value,current_green_value,current_blue_value,strip.numPixels());
+    if (change_result_map.size() <= 0){
+      run_change_mode = false;
+      run_new_color = true; 
+    }
+  turn_on_led_mode_color(change_result_map);
+  }
+
   if (run_new_color){
-    set_new_color(current_red_value,current_green_value,current_blue_value,current_change_mode_id);
+    set_color(current_red_value, current_green_value, current_blue_value);
     run_new_color = false;
   }
 }

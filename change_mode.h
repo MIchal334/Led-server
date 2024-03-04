@@ -9,8 +9,8 @@
 
 class ChangeMode {
 public:
-  ChangeMode(String optionName, int changeModeServerId, const std::function<void(int, int, int,int)>& function);
-  std::function<void(int, int, int,int)> get_function();
+  ChangeMode(String optionName, int changeModeServerId, const std::function<std::map<int, uint32_t>(int, int, int,int)>& function);
+  std::function<std::map<int, uint32_t>(int, int, int,int)> get_function();
   String get_option_name();
   int get_change_mode_server_id();
   DynamicJsonDocument toJson();
@@ -18,7 +18,7 @@ public:
 private:
   String optionName;
   int changeModeServerId;
-  std::function<void(int, int, int,int)> changeFunction;
+  std::function<std::map<int, uint32_t>(int, int, int,int)> changeFunction;
 };
 
 #endif
