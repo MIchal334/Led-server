@@ -6,12 +6,11 @@
 std::vector<ChangeMode> ChangeModeList::list_mode;
 
 void ChangeModeList::wunsz(int red_value, int green_value , int blue_value, int amount_led) {
-  Serial.println("RUN CHANHE MODE : WUNSZ");
-
+  LedConfig::getStrip().clear();
   for (int i = 0; i < amount_led; i++) {
     int j = amount_led - i;
-    LedConfig::getStrip().setPixelColor(i, red_value, green_value, blue_value);
-    LedConfig::getStrip().setPixelColor(j, red_value, green_value, blue_value);
+    LedConfig::getStrip().setPixelColor(i, red_value,green_value, blue_value);
+    LedConfig::getStrip().setPixelColor(j, red_value,green_value, blue_value);
     LedConfig::getStrip().setPixelColor(i - 7, 0, 0, 0);
     LedConfig::getStrip().setPixelColor(j + 7, 0, 0, 0);
     LedConfig::getStrip().show();
@@ -20,9 +19,8 @@ void ChangeModeList::wunsz(int red_value, int green_value , int blue_value, int 
 }
 
 void ChangeModeList::protektor(int red_value, int green_value , int blue_value, int amount_led) {
-  Serial.println("RUN CHANHE MODE : PROT");
   for ( int j = 0; j < 15; j++) {
-    uint32_t color = randomColor();
+    uint32_t color =  Color::randomColor();
     LedConfig::getStrip().clear();
     LedConfig::getStrip().show();
     delay (50);
@@ -35,9 +33,6 @@ void ChangeModeList::protektor(int red_value, int green_value , int blue_value, 
 }
 
 
-uint32_t ChangeModeList::randomColor() {
-  return LedConfig::getStrip().Color(random(0, 255), random(0, 255), random(0, 255));
-}
 
 ChangeMode ChangeModeList::wunsz_mode_creator() {
     std::function<void(int, int, int, int)> changeFunction = [](int red_value, int green_value , int blue_value, int amount_led) {

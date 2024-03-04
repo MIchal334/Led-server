@@ -19,6 +19,7 @@ public:
     int getGreen() const;
     int getBlue() const;
     uint32_t toStripColor();
+    static uint32_t randomColor();
 };
 
 #endif

@@ -20,3 +20,7 @@ int Color::getBlue() const {
 uint32_t Color::toStripColor(){
   return LedConfig::getStrip().Color(this->red, this->green, this->blue);
 }
+
+uint32_t Color::randomColor() {
+  return LedConfig::getStrip().Color(random(0, 255), random(0, 255), random(0, 255));
+}

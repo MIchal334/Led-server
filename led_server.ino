@@ -12,17 +12,17 @@
 #include "color.h"
 #include "led_config.h"
 
-// const char *ssid = "TP-Link_D2C2";
-// const char *password = "08275929";
+const char *ssid = "TP-Link_D2C2";
+const char *password = "08275929";
 
 
-const char *ssid = "NETIASPOT-2.4GHz-u5sK";
-const char *password = "x4vt62TT";
+// const char *ssid = "NETIASPOT-2.4GHz-u5sK";
+// const char *password = "x4vt62TT";
   
 
 // const char *ssid = "tzg_dom_1";
 // const char *password = "438865980";
-Adafruit_NeoPixel strip ; 
+Adafruit_NeoPixel strip;
 
 ESP8266WebServer server(8080);
 IPAddress ip(192, 168, 0, 177);
@@ -30,6 +30,7 @@ IPAddress ip(192, 168, 0, 177);
 int current_red_value = 0;
 int current_blue_value = 0;
 int current_green_value = 0;
+int current_change_mode_id = 0;
 
 
 std::map<int, uint32_t> empty(int a, int b, int c, int d){
@@ -39,7 +40,8 @@ std::map<int, uint32_t> empty(int a, int b, int c, int d){
 
 std::function<std::map<int, uint32_t>(int, int, int, int)> currentFunction = empty;
 
-
+bool run_new_color;
+bool is_started;
 
 void handle_config() {
   ServerConfig server_config;
@@ -59,7 +61,6 @@ void handle_test() {
 
 
 void led_off() {
-  Serial.println("LED_OFF");
   currentFunction = empty;
   for(int i=0; i<strip.numPixels(); ++i){
        strip.setPixelColor(i, strip.Color(0, 0, 0));
@@ -93,41 +94,53 @@ std::optional<ClientRequest> get_object_from_json() {
 }
 
 
-void set_new_color(){
+void handle_new_color_endpoint(){
   std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
   if (clientRequestOptional.has_value()) {
       ClientRequest clientRequest = clientRequestOptional.value();
       currentFunction = empty;
-      run_change_mode(clientRequest);
-      set_color(clientRequest.get_red_value(),clientRequest.get_green_value(),clientRequest.get_blue_value());
-    } 
+      current_red_value = clientRequest.get_red_value();
+      current_blue_value = clientRequest.get_blue_value();
+      current_green_value = clientRequest.get_green_value();
+      current_change_mode_id = clientRequest.get_change_mode_id();
+      run_new_color = true;
+    }
+    clientRequestOptional = std::nullopt; 
+}
+
+void set_new_color(int red, int green, int blue,int change_mode_id){
+    strip.clear();
+    run_change_mode(red,green,blue,change_mode_id);
+    set_color(red,green,blue);
 }
 
 
 
-void run_change_mode(ClientRequest clientRequest){
+void run_change_mode(int red, int green, int blue, int change_mode_id){
   
-  std::optional<std::function<void(int,int,int,int)>> change_function_optional = ChangeModeList::get_change_function_by_ID(clientRequest.get_change_mode_id());
+  std::optional<std::function<void(int,int,int,int)>> change_function_optional = ChangeModeList::get_change_function_by_ID(change_mode_id);
   
   if (change_function_optional.has_value()) {
     std::function<void(int,int,int,int)> change_function = change_function_optional.value();
-    change_function(clientRequest.get_red_value(),clientRequest.get_green_value(),clientRequest.get_blue_value(),strip.numPixels());
+    change_function(red,green,blue,strip.numPixels());
   }
 
 }
 
 void set_color(int red, int green, int blue){
-   Serial.println("SET NEW COLOR ");
     for(int i=0; i<strip.numPixels(); ++i){
-       strip.setPixelColor(i, strip.Color(red, blue, green));
+       strip.setPixelColor(i, strip.Color(red, green,blue));
     }
     strip.show(); 
 }
 
 
 void run_led_mode(){
+  current_change_mode_id = 0;
+  run_new_color = false;
   std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
   if (clientRequestOptional.has_value()) {
+      run_new_color = false;
       ClientRequest clientRequest = clientRequestOptional.value();
       std::optional<std::function<std::map<int, uint32_t>(int, int, int, int)>> change_function_optional= LedModeList::get_change_function_by_ID(clientRequest.get_change_mode_id());
       if (change_function_optional.has_value()) {
@@ -136,7 +149,7 @@ void run_led_mode(){
         current_blue_value = clientRequest.get_blue_value();
         current_green_value = clientRequest.get_green_value();
       }
-
+    clientRequestOptional = std::nullopt; 
     } 
 }
 
@@ -145,42 +158,79 @@ void turn_on_led_mode_color(std::map<int, uint32_t> led_result_map){
       strip.setPixelColor(pair.first, pair.second);
     }
     strip.show();
+    
+}
+
+
+void start(){
+  // for(int i=0; i<strip.numPixels(); i++) {
+  //   if (i % 3 == 0){
+  //     strip.setPixelColor(i, strip.Color(120, 0, 0));
+  //   }
+    
+  //   if (i % 3 == 1){
+  //     strip.setPixelColor(i, strip.Color(0, 120, 0));
+  //   }
+
+  //   if (i % 3 == 2){
+  //     strip.setPixelColor(i, strip.Color(0, 0, 120));
+  //   }
+  //   strip.show();
+  //   delay(35);
+  // }
+  uint32_t color =  Color::randomColor();
+  for(int i=0; i<strip.numPixels(); ++i){
+       strip.setPixelColor(i, color);
+  }
+  strip.show(); 
 }
 
 void setup() {
+  run_new_color = false;
   Serial.begin(115200);
+  pinMode(PIN, OUTPUT);
 
 
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
+    delay(500);
     Serial.println("Connecting to WiFi...");
   }
 
 
-  Serial.println("Connected to WiFi");
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP());
+  // Serial.println("Connected to WiFi");
+  // Serial.print("IP Address: ");
+  // Serial.println(WiFi.localIP());
 
   server.on("/config", HTTP_GET, handle_config);
   server.on("/test", HTTP_GET, handle_test);
   server.on("/off", HTTP_PUT, led_off);
-  server.on("/color", HTTP_POST, set_new_color);
+  server.on("/color", HTTP_POST, handle_new_color_endpoint);
   server.on("/mode", HTTP_POST, run_led_mode);
   server.begin();
 
   ChangeModeList::prepare_list();
   LedModeList::prepare_list();
   Serial.println("Watiing for strip");
-  strip = LedConfig::getStrip();
-
+  strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800); 
+  strip.begin();
+  delay(400);
+  is_started = false;
 }
 
 void loop() {
   server.handleClient();
+  if (!is_started){
+     start();
+     is_started = true;
+  }
   std::map<int, uint32_t> led_result_map = currentFunction(current_red_value,current_blue_value,current_green_value,strip.numPixels());
   if(led_result_map.size() > 0 ){
       turn_on_led_mode_color(led_result_map);
+  }
+  if (run_new_color){
+    set_new_color(current_red_value,current_green_value,current_blue_value,current_change_mode_id);
+    run_new_color = false;
   }
 }

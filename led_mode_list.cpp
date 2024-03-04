@@ -6,11 +6,11 @@ std::vector<LedMode> LedModeList::list_mode;
 int ania_effect_counter = 0;
 int ania_effect_snke_length = 5;
 int ania_color_level = 100;
-int ania_effect_time_delay = 1000; 
+int ania_effect_time_delay = 80; 
 static unsigned long ania_effect_last_time = 0;
 
 std::map<int, uint32_t> LedModeList::ania_effect(int red_value, int green_value , int blue_value, int amount_led) {
-      Serial.println("RUN ANIA EFFECT");
+
       std::map<int, uint32_t> result;
        if ( millis() - ania_effect_last_time >= ania_effect_time_delay) {
         for(int i=0; i<amount_led; ++i) {
@@ -21,13 +21,16 @@ std::map<int, uint32_t> LedModeList::ania_effect(int red_value, int green_value 
           }
 
           if(i % (2*ania_effect_snke_length) < ania_effect_snke_length ){
-            result[led_number] = LedConfig::getStrip().Color(0, 0, ania_color_level);
+            result[led_number] = LedConfig::getStrip().Color(0, ania_color_level, 0);
           }else{
             result[led_number] = LedConfig::getStrip().Color(ania_color_level, 0, 0);
           }
       }
       ania_effect_last_time = millis();
       ania_effect_counter++;
+      if (ania_effect_counter > amount_led){
+        ania_effect_counter = 0;
+      }
     }
     return result;
 }
@@ -39,17 +42,17 @@ static unsigned long rainbow_effect_last_time = 0;
 
 std::map<int, uint32_t> LedModeList::rainbow(int red_value, int green_value , int blue_value, int amount_led) {
   std::map<int, uint32_t> result;
-        Serial.println("RAINBOW RUN");
  if ( millis() - rainbow_effect_last_time >= rainbow_effect_time_delay){
     for (int i = 0; i < amount_led; i++) {
-      result[i] = wheel((i * 1 + rainbow_led_counter)) & 255;
+      result[i] = wheel(i * 1 + rainbow_led_counter) & 255;
     }
-    if (rainbow_led_counter >= 255){
+    if (rainbow_led_counter > 255){
         rainbow_led_counter = 0;
     }
     rainbow_led_counter++;
+    rainbow_effect_last_time = millis();
  }
-  rainbow_effect_last_time = millis();
+  
   return result;
 }
 
