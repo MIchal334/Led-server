@@ -64,6 +64,59 @@ std::map<int, uint32_t> ChangeModeList::protektor(int red_value, int green_value
 }
 
 
+std::map<int, uint32_t> result_soft;
+int soft_delay = 70;
+static unsigned long soft_effect_last_time = 0;
+int soft_current_red = 0;
+int soft_current_green = 0;
+int soft_current_blue = 0;
+bool soft_flag = false;
+
+std::map<int, uint32_t> ChangeModeList::soft(int red_value, int green_value , int blue_value, int amount_led) {
+  if (!soft_flag){
+    int* old_array  = LedConfig::get_old_value();
+    soft_current_red = old_array[0];
+    soft_current_green = old_array[1];
+    soft_current_blue = old_array[2];
+    soft_flag = true;
+  }
+
+  if (soft_current_red == red_value && soft_current_green == green_value && soft_current_blue == blue_value ){
+    std::map<int, uint32_t> result;
+    soft_flag = false;
+    return result;
+  }
+
+
+  if (millis() - soft_effect_last_time >= soft_delay){
+    if (soft_current_red > red_value){
+      soft_current_red--;
+    }else if(soft_current_red < red_value){
+      soft_current_red++;
+    }
+
+    if (soft_current_green > green_value){
+      soft_current_green--;
+    }else if(soft_current_green < green_value){
+      soft_current_green++;
+    }
+
+    if (soft_current_blue > blue_value){
+      soft_current_blue--;
+    }else if(soft_current_blue < blue_value){
+      soft_current_blue++;
+    }
+
+
+    uint32_t color = LedConfig::getStrip().Color(soft_current_red,soft_current_green,soft_current_blue);
+    for (int i = 0; i < amount_led; i++) {
+      result_soft[i] = color;
+    }
+    soft_effect_last_time = millis();
+  }
+  return result_soft;
+}
+
 
 ChangeMode ChangeModeList::wunsz_mode_creator() {
     std::function<std::map<int, uint32_t>(int, int, int, int)> changeFunction = [](int red_value, int green_value , int blue_value, int amount_led) {
@@ -83,9 +136,20 @@ ChangeMode ChangeModeList::prot_mode_creator() {
     return protektor_mode;
 }
 
+
+
+ChangeMode ChangeModeList::soft_mode_creator() {
+    std::function<std::map<int, uint32_t>(int, int, int, int)> changeFunction = [](int red_value, int green_value , int blue_value, int amount_led) {
+        return ChangeModeList::soft(red_value,green_value,blue_value,amount_led);
+    };
+    ChangeMode soft_mode("Soft", 3, changeFunction);
+    return soft_mode;
+}
+
 void ChangeModeList::prepare_list() {
   ChangeModeList::list_mode.push_back(wunsz_mode_creator());
   ChangeModeList::list_mode.push_back(prot_mode_creator());
+  ChangeModeList::list_mode.push_back(soft_mode_creator());
 }
 
 std::vector<ChangeMode> ChangeModeList::get_change_list() {

@@ -99,6 +99,7 @@ std::optional<ClientRequest> get_object_from_json() {
 void handle_new_color_endpoint(){
   std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
   if (clientRequestOptional.has_value()) {
+      LedConfig::set_old_values(current_red_value,current_green_value,current_blue_value);
       ClientRequest clientRequest = clientRequestOptional.value();
       currentFunction = empty;
       current_red_value = clientRequest.get_red_value();
@@ -114,24 +115,6 @@ void handle_new_color_endpoint(){
     clientRequestOptional = std::nullopt; 
 }
 
-// void set_new_color(int red, int green, int blue,int change_mode_id){
-    
-//     run_change_mode(red,green,blue,change_mode_id);
-//     set_color(red,green,blue);
-// }
-
-
-
-// void run_change_mode(int red, int green, int blue, int change_mode_id){
-  
-//   std::optional<std::function<void(int,int,int,int)>> change_function_optional = ChangeModeList::get_change_function_by_ID(change_mode_id);
-  
-//   if (change_function_optional.has_value()) {
-//     std::function<void(int,int,int,int)> change_function = change_function_optional.value();
-//     change_function(red,green,blue,strip.numPixels());
-//   }
-
-// }
 
 void set_color(int red, int green, int blue){
     for(int i=0; i<strip.numPixels(); ++i){
@@ -155,6 +138,7 @@ void run_led_mode(){
         current_red_value = clientRequest.get_red_value();
         current_blue_value = clientRequest.get_blue_value();
         current_green_value = clientRequest.get_green_value();
+        LedConfig::set_old_values(current_red_value,current_green_value,current_blue_value);
       }
     clientRequestOptional = std::nullopt; 
     } 
@@ -165,27 +149,13 @@ void turn_on_led_mode_color(std::map<int, uint32_t> led_result_map){
       strip.setPixelColor(pair.first, pair.second);
     }
     strip.show();
-    
 }
 
 
 void start(){
-  // for(int i=0; i<strip.numPixels(); i++) {
-  //   if (i % 3 == 0){
-  //     strip.setPixelColor(i, strip.Color(120, 0, 0));
-  //   }
-    
-  //   if (i % 3 == 1){
-  //     strip.setPixelColor(i, strip.Color(0, 120, 0));
-  //   }
-
-  //   if (i % 3 == 2){
-  //     strip.setPixelColor(i, strip.Color(0, 0, 120));
-  //   }
-  //   strip.show();
-  //   delay(35);
-  // }
   uint32_t color =  Color::randomColor();
+
+  LedConfig::set_old_values(0,0,0);
   for(int i=0; i<strip.numPixels(); ++i){
        strip.setPixelColor(i, color);
   }
