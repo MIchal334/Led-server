@@ -118,6 +118,78 @@ std::map<int, uint32_t> ChangeModeList::soft(int red_value, int green_value , in
 }
 
 
+std::map<int, uint32_t> result_pixels;
+std::list<int> turned_off;
+std::list<int> turned_on;
+int current_processing_led_nume = -1;
+int pixels_itterator  = 0 ;
+int pixels_delay = 70;
+static unsigned long pixels_effect_last_time = 0;
+
+std::map<int, uint32_t> ChangeModeList::pixels(int red_value, int green_value, int blue_value, int amount_led) {
+    int* old_array = LedConfig::get_old_value();
+
+    if (millis() - pixels_effect_last_time >= pixels_delay){
+    if (turned_on.size() >= amount_led) {
+        std::map<int, uint32_t> result;
+        turned_on.clear();
+        turned_off.clear();
+        current_processing_led_nume = -1;
+        return result;
+    }
+
+    if (current_processing_led_nume == -1) {
+        bool found = true;
+        while (true) {
+            current_processing_led_nume = random(0, amount_led);
+
+            if (turned_off.size() <= amount_led) {
+                found = (std::find(turned_off.begin(), turned_off.end(), current_processing_led_nume) != turned_off.end());
+            }
+
+            if (turned_on.size() <= amount_led) {
+                found = (std::find(turned_on.begin(), turned_on.end(), current_processing_led_nume) != turned_on.end());
+            }
+
+            if (!found) {
+                break;
+            }
+        }
+
+        pixels_itterator = 1;
+    }
+
+    if (turned_off.size() <= amount_led) {
+        for (int i = 0; i < amount_led; i++) {
+            if (i == current_processing_led_nume) {
+                result_pixels[i] = LedConfig::getStrip().Color(0, 0, 0);
+                turned_off.push_back(current_processing_led_nume);
+                current_processing_led_nume = -1;
+            } else if ((std::find(turned_off.begin(), turned_off.end(), i) != turned_off.end())) {
+                result_pixels[i] = LedConfig::getStrip().Color(0, 0, 0);
+            } else {
+                result_pixels[i] = LedConfig::getStrip().Color(old_array[0], old_array[1], old_array[2]);
+            }
+        }
+    }else{
+        for (int i = 0; i < amount_led; i++) {
+            if (i == current_processing_led_nume) {
+                result_pixels[i] = LedConfig::getStrip().Color(red_value, green_value, blue_value);
+                turned_on.push_back(current_processing_led_nume);
+                current_processing_led_nume = -1;
+            } else if ((std::find(turned_on.begin(), turned_on.end(), i) != turned_on.end())) {
+                result_pixels[i] = LedConfig::getStrip().Color(red_value, green_value, blue_value);
+            } else {
+                result_pixels[i] = LedConfig::getStrip().Color(0, 0, 0);
+            }
+        }
+    }
+    pixels_effect_last_time = millis();
+  }
+
+  return result_pixels;
+}
+
 ChangeMode ChangeModeList::wunsz_mode_creator() {
     std::function<std::map<int, uint32_t>(int, int, int, int)> changeFunction = [](int red_value, int green_value , int blue_value, int amount_led) {
         return ChangeModeList::wunsz(red_value,green_value,blue_value,amount_led);
@@ -146,10 +218,21 @@ ChangeMode ChangeModeList::soft_mode_creator() {
     return soft_mode;
 }
 
+
+
+ChangeMode ChangeModeList::pixels_mode_creator() {
+    std::function<std::map<int, uint32_t>(int, int, int, int)> changeFunction = [](int red_value, int green_value , int blue_value, int amount_led) {
+        return ChangeModeList::pixels(red_value,green_value,blue_value,amount_led);
+    };
+    ChangeMode soft_mode("Zmiana", 4, changeFunction);
+    return soft_mode;
+}
+
 void ChangeModeList::prepare_list() {
   ChangeModeList::list_mode.push_back(wunsz_mode_creator());
   ChangeModeList::list_mode.push_back(prot_mode_creator());
   ChangeModeList::list_mode.push_back(soft_mode_creator());
+  ChangeModeList::list_mode.push_back(pixels_mode_creator());
 }
 
 std::vector<ChangeMode> ChangeModeList::get_change_list() {

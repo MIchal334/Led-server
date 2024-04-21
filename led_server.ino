@@ -12,12 +12,12 @@
 #include "color.h"
 #include "led_config.h"
 
-const char *ssid = "TP-Link_D2C2";
-const char *password = "08275929";
+// const char *ssid = "TP-Link_D2C2";
+// const char *password = "08275929";
 
 
-// const char *ssid = "NETIASPOT-2.4GHz-u5sK";
-// const char *password = "x4vt62TT";
+const char *ssid = "NETIASPOT-2.4GHz-u5sK";
+const char *password = "x4vt62TT";
   
 
 // const char *ssid = "tzg_dom_1";
@@ -138,8 +138,8 @@ void run_led_mode(){
         current_red_value = clientRequest.get_red_value();
         current_blue_value = clientRequest.get_blue_value();
         current_green_value = clientRequest.get_green_value();
-        LedConfig::set_old_values(current_red_value,current_green_value,current_blue_value);
       }
+    LedConfig::set_old_values(current_red_value,current_green_value,current_blue_value);
     clientRequestOptional = std::nullopt; 
     } 
 }
@@ -177,9 +177,9 @@ void setup() {
   }
 
 
-  // Serial.println("Connected to WiFi");
-  // Serial.print("IP Address: ");
-  // Serial.println(WiFi.localIP());
+  Serial.println("Connected to WiFi");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
 
   server.on("/config", HTTP_GET, handle_config);
   server.on("/test", HTTP_GET, handle_test);
@@ -195,6 +195,7 @@ void setup() {
   strip.begin();
   delay(400);
   is_started = false;
+  randomSeed(analogRead(0));
   
 }
 
