@@ -10,6 +10,7 @@ int wunsz_counter = 0;
 int wunsz_delay = 50;
 static unsigned long wunsz_effect_last_time = 0;
 std::map<int, uint32_t> result_wunsz;
+
 std::map<int, uint32_t> ChangeModeList::wunsz(int red_value, int green_value , int blue_value, int amount_led) {
 
   if (wunsz_counter > amount_led){
@@ -30,19 +31,37 @@ std::map<int, uint32_t> ChangeModeList::wunsz(int red_value, int green_value , i
   return result_wunsz;
 }
 
-// void ChangeModeList::protektor(int red_value, int green_value , int blue_value, int amount_led) {
-//   for ( int j = 0; j < 15; j++) {
-//     uint32_t color =  Color::randomColor();
-//     LedConfig::getStrip().clear();
-//     LedConfig::getStrip().show();
-//     delay (50);
-//     for (int i = 0; i < amount_led; i++) {
-//       LedConfig::getStrip().setPixelColor(i, color);
-//     }
-//     LedConfig::getStrip().show();
-//     delay(100);
-//   }
-// }
+
+std::map<int, uint32_t> result_protektor;
+int proketkor_delay = 150;
+static unsigned long protektor_effect_last_time = 0;
+int prot_counter = 0;
+int amount_prot = 20;
+
+std::map<int, uint32_t> ChangeModeList::protektor(int red_value, int green_value , int blue_value, int amount_led) {
+  if (prot_counter > amount_prot){
+    std::map<int, uint32_t> result;
+    prot_counter = 0;
+    return result;
+  }
+
+  if (millis() - protektor_effect_last_time >= proketkor_delay){
+    uint32_t color =  Color::randomColor();
+    for (int i = 0; i < amount_led; i++) {
+      result_protektor[i] = color;
+    }
+    protektor_effect_last_time = millis();
+    prot_counter++;
+  }
+
+  if (millis() - protektor_effect_last_time >= 2*proketkor_delay/3){
+    for (int i = 0; i < amount_led; i++) {
+      result_protektor[i] = LedConfig::getStrip().Color(0,0,0);
+    }
+  }
+
+  return result_protektor;
+}
 
 
 
@@ -56,17 +75,17 @@ ChangeMode ChangeModeList::wunsz_mode_creator() {
 
 
 
-// ChangeMode ChangeModeList::prot_mode_creator() {
-//     std::function<void(int, int, int, int)> changeFunction = [](int red_value, int green_value , int blue_value, int amount_led) {
-//         ChangeModeList::protektor(red_value,green_value,blue_value,amount_led);
-//     };
-//     ChangeMode protektor_mode("Prot", 2, changeFunction);
-//     return protektor_mode;
-// }
+ChangeMode ChangeModeList::prot_mode_creator() {
+    std::function<std::map<int, uint32_t>(int, int, int, int)> changeFunction = [](int red_value, int green_value , int blue_value, int amount_led) {
+        return ChangeModeList::protektor(red_value,green_value,blue_value,amount_led);
+    };
+    ChangeMode protektor_mode("Prot", 2, changeFunction);
+    return protektor_mode;
+}
 
 void ChangeModeList::prepare_list() {
   ChangeModeList::list_mode.push_back(wunsz_mode_creator());
-  // ChangeModeList::list_mode.push_back(prot_mode_creator());
+  ChangeModeList::list_mode.push_back(prot_mode_creator());
 }
 
 std::vector<ChangeMode> ChangeModeList::get_change_list() {

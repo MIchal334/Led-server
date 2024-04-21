@@ -13,8 +13,8 @@ private:
     static std::vector<ChangeMode> list_mode;
     static std::map<int, uint32_t> wunsz(int red_value, int green_value , int blue_value, int amount_led);
     static ChangeMode wunsz_mode_creator();
-    // static void protektor(int red_value, int green_value , int blue_value, int amount_led);
-    // static ChangeMode prot_mode_creator();
+    static std::map<int, uint32_t> protektor(int red_value, int green_value , int blue_value, int amount_led);
+    static ChangeMode prot_mode_creator();
   
 
 public:
