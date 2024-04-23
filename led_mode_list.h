@@ -18,6 +18,8 @@ private:
     static std::map<int, uint32_t> rainbow(int red_value, int green_value , int blue_value, int amount_led);
     static uint32_t wheel(byte WheelPos);
     static LedMode rainbow_effect_creator();
+    static std::map<int, uint32_t> random_change(int red_value, int green_value , int blue_value, int amount_led);
+    static LedMode random_effect_creator();
 
 public:
     static std::vector<LedMode> getModeList();

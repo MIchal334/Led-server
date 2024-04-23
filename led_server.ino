@@ -153,9 +153,12 @@ void turn_on_led_mode_color(std::map<int, uint32_t> led_result_map){
 
 
 void start(){
-  uint32_t color =  Color::randomColor();
-
-  LedConfig::set_old_values(0,0,0);
+  int r = random(10, 200);
+  int g = random(10, 200);
+  int b = random(10, 200);
+  uint32 color = LedConfig::getStrip().Color(r, g, b);
+  LedConfig::set_old_values(r,g,b);
+  
   for(int i=0; i<strip.numPixels(); ++i){
        strip.setPixelColor(i, color);
   }

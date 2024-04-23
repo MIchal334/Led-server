@@ -44,7 +44,6 @@ std::map<int, uint32_t> LedModeList::rainbow(int red_value, int green_value, int
   std::map<int, uint32_t> result;
   if (millis() - rainbow_effect_last_time >= rainbow_effect_time_delay) {
     for (int i = 0; i < amount_led; i++) {
-      // Ustawienie koloru dla każdej diody w zależności od jej indeksu
       result[i] = wheel((i + rainbow_led_counter) % 256);
     }
     rainbow_led_counter++;
@@ -69,6 +68,68 @@ uint32_t LedModeList::wheel(byte WheelPos) {
 }
 
 
+bool is_change_mode = false;
+int random_counter  = 0;
+int random_effect_time_delay = 15 * 1000; 
+int randmo_effect_change_delay =  40;
+static long random_effect_last_time = -random_effect_time_delay;
+static long random_effect_change_last_time = 0;
+std::map<int, uint32_t> random_result;
+int r,g,b;
+
+std::map<int, uint32_t> LedModeList::random_change(int red_value, int green_value, int blue_value, int amount_led) {
+
+
+  if (millis() - random_effect_last_time >= random_effect_time_delay) {
+    if (!is_change_mode){
+      r=random(0,200);
+      g=random(0,200);
+      b=random(0,200);
+
+    if ((r + g + b) <= 45){
+      r = 20;
+      g = 20;
+      b = 20;
+    }
+    is_change_mode = true; 
+  }
+    if (millis() - random_effect_change_last_time >= randmo_effect_change_delay)
+    {
+    int* old_array = LedConfig::get_old_value();
+    random_counter++;
+
+    for (int i = 0; i < amount_led; i++) {
+      random_result[i] = LedConfig::getStrip().Color(old_array[0], old_array[1], old_array[2]);
+    }
+
+
+    for (int i = 0; i < random_counter; i++) {
+      random_result[i] = LedConfig::getStrip().Color(r, g, b);
+    }
+    
+    for (int i = amount_led - 1; i > (amount_led - random_counter); i--) {
+      random_result[i] = LedConfig::getStrip().Color(r, g, b);
+    }
+
+    random_effect_change_last_time = millis();
+
+    if(random_counter >= (amount_led/2+1) ){
+      random_effect_last_time = millis();
+      random_counter = 0;
+      LedConfig::set_old_values(r,g,b);
+      is_change_mode = false;
+    }
+
+    }
+
+  }
+  
+  return random_result;
+}
+
+
+
+
 LedMode LedModeList::ania_effect_creator(){
     std::function<std::map<int, uint32_t>(int, int, int, int)> modeFunction =[](int red, int blue, int green, int amount_led) {
             return LedModeList::ania_effect(red, blue, green, amount_led);
@@ -88,9 +149,19 @@ LedMode LedModeList::rainbow_effect_creator(){
 }
 
 
+LedMode LedModeList::random_effect_creator(){
+      std::function<std::map<int, uint32_t>(int, int, int, int)> modeFunction =[](int red, int blue, int green, int amount_led) {
+            return LedModeList::random_change(red, blue, green, amount_led);
+    };
+
+    LedMode random_effect_mode("Losowy", 3, false, modeFunction);
+    return random_effect_mode;
+}
+
 void LedModeList::prepare_list() {
     LedModeList::list_mode.push_back(ania_effect_creator());
     LedModeList::list_mode.push_back(rainbow_effect_creator());
+    LedModeList::list_mode.push_back(random_effect_creator());
 }
 
 std::vector<LedMode> LedModeList::getModeList() {
