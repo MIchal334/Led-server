@@ -40,18 +40,16 @@ int rainbow_led_counter = 0;
 int rainbow_effect_time_delay = 40; 
 static unsigned long rainbow_effect_last_time = 0;
 
-std::map<int, uint32_t> LedModeList::rainbow(int red_value, int green_value , int blue_value, int amount_led) {
+std::map<int, uint32_t> LedModeList::rainbow(int red_value, int green_value, int blue_value, int amount_led) {
   std::map<int, uint32_t> result;
- if ( millis() - rainbow_effect_last_time >= rainbow_effect_time_delay){
+  if (millis() - rainbow_effect_last_time >= rainbow_effect_time_delay) {
     for (int i = 0; i < amount_led; i++) {
-      result[i] = wheel(i * 1 + rainbow_led_counter) & 255;
-    }
-    if (rainbow_led_counter > 255){
-        rainbow_led_counter = 0;
+      // Ustawienie koloru dla każdej diody w zależności od jej indeksu
+      result[i] = wheel((i + rainbow_led_counter) % 256);
     }
     rainbow_led_counter++;
     rainbow_effect_last_time = millis();
- }
+  }
   
   return result;
 }
