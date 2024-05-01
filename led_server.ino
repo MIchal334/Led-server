@@ -99,7 +99,8 @@ std::optional<ClientRequest> get_object_from_json() {
 void handle_new_color_endpoint(){
   std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
   if (clientRequestOptional.has_value()) {
-      LedConfig::set_old_values(current_red_value,current_green_value,current_blue_value);
+      int* old_vlaue = LedConfig::get_old_value();
+      LedConfig::set_old_values(old_vlaue[0],old_vlaue[1],old_vlaue[2]);
       ClientRequest clientRequest = clientRequestOptional.value();
       currentFunction = empty;
       current_red_value = clientRequest.get_red_value();
@@ -158,7 +159,7 @@ void start(){
   int b = random(10, 200);
   uint32 color = LedConfig::getStrip().Color(r, g, b);
   LedConfig::set_old_values(r,g,b);
-  
+
   for(int i=0; i<strip.numPixels(); ++i){
        strip.setPixelColor(i, color);
   }
