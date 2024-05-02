@@ -4,7 +4,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #define PIN 12
-#define NUMPIXELS     150  
+#define NUMPIXELS  100  
 
 class LedConfig {
 private:

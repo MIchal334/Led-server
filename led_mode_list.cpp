@@ -129,6 +129,63 @@ std::map<int, uint32_t> LedModeList::random_change(int red_value, int green_valu
 
 
 
+int smooth_effect_counter = 0;
+int smooth_color_level_max = 150;
+int smooth_effect_time_delay = 500; 
+int current_red_level = smooth_color_level_max;
+int current_gren_level = 0;
+int current_blue_level = 0;
+static unsigned long smooth_effect_last_time = 0;
+
+
+
+std::map<int, uint32_t> LedModeList::smooth_effect(int red_value, int green_value , int blue_value, int amount_led) {
+
+      std::map<int, uint32_t> result;
+      if ( millis() - smooth_effect_last_time >= smooth_effect_time_delay) {
+        if(smooth_effect_counter % 3 == 0){
+          current_gren_level++;
+          current_red_level--;
+          current_blue_level = 0;
+          if(current_gren_level ==  smooth_color_level_max){
+            smooth_effect_counter++;
+          }
+
+        }
+
+        if(smooth_effect_counter % 3 == 1){
+          current_gren_level--;
+          current_red_level = 0;
+          current_blue_level++;
+
+          if(current_blue_level ==  smooth_color_level_max){
+            smooth_effect_counter++;
+          }
+
+        }
+
+        if(smooth_effect_counter % 3 == 2){
+          current_gren_level = 0;
+          current_red_level ++;
+          current_blue_level--;
+
+          if(current_red_level ==  smooth_color_level_max){
+            smooth_effect_counter++;
+          }
+
+        }
+
+        for(int i=0; i<amount_led; ++i) {
+            result[i] = LedConfig::getStrip().Color(current_red_level, current_gren_level, current_blue_level);
+        }
+        smooth_effect_last_time =  millis();
+
+    }
+    return result;
+}
+
+
+
 
 LedMode LedModeList::ania_effect_creator(){
     std::function<std::map<int, uint32_t>(int, int, int, int)> modeFunction =[](int red, int blue, int green, int amount_led) {
@@ -158,10 +215,21 @@ LedMode LedModeList::random_effect_creator(){
     return random_effect_mode;
 }
 
+LedMode LedModeList::smooth_effect_creator(){
+      std::function<std::map<int, uint32_t>(int, int, int, int)> modeFunction =[](int red, int blue, int green, int amount_led) {
+            return LedModeList::smooth_effect(red, blue, green, amount_led);
+    };
+
+    LedMode random_effect_mode("Smukly", 4, false, modeFunction);
+    return random_effect_mode;
+}
+
 void LedModeList::prepare_list() {
     LedModeList::list_mode.push_back(ania_effect_creator());
     LedModeList::list_mode.push_back(rainbow_effect_creator());
     LedModeList::list_mode.push_back(random_effect_creator());
+    LedModeList::list_mode.push_back(smooth_effect_creator());
+
 }
 
 std::vector<LedMode> LedModeList::getModeList() {

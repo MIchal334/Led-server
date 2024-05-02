@@ -16,12 +16,12 @@
 // const char *password = "08275929";
 
 
-const char *ssid = "NETIASPOT-2.4GHz-u5sK";
-const char *password = "x4vt62TT";
+// const char *ssid = "NETIASPOT-2.4GHz-u5sK";
+// const char *password = "x4vt62TT";
   
 
-// const char *ssid = "tzg_dom_1";
-// const char *password = "438865980";
+const char *ssid = "tzg_dom_1";
+const char *password = "438865980";
 Adafruit_NeoPixel strip;
 
 ESP8266WebServer server(8080);
@@ -64,6 +64,7 @@ void handle_test() {
 
 void led_off() {
   currentFunction = empty;
+  LedConfig::set_old_values(0,0,0);
   for(int i=0; i<strip.numPixels(); ++i){
        strip.setPixelColor(i, strip.Color(0, 0, 0));
     }
@@ -99,8 +100,8 @@ std::optional<ClientRequest> get_object_from_json() {
 void handle_new_color_endpoint(){
   std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
   if (clientRequestOptional.has_value()) {
-      int* old_vlaue = LedConfig::get_old_value();
-      LedConfig::set_old_values(old_vlaue[0],old_vlaue[1],old_vlaue[2]);
+      // int* old_vlaue = LedConfig::get_old_value();
+      // LedConfig::set_old_values(old_vlaue[0],old_vlaue[1],old_vlaue[2]);
       ClientRequest clientRequest = clientRequestOptional.value();
       currentFunction = empty;
       current_red_value = clientRequest.get_red_value();
@@ -154,12 +155,8 @@ void turn_on_led_mode_color(std::map<int, uint32_t> led_result_map){
 
 
 void start(){
-  int r = random(10, 200);
-  int g = random(10, 200);
-  int b = random(10, 200);
-  uint32 color = LedConfig::getStrip().Color(r, g, b);
-  LedConfig::set_old_values(r,g,b);
-
+  LedConfig::set_old_values(0,0,0);
+  uint32 color = LedConfig::getStrip().Color(120, 0, 0);
   for(int i=0; i<strip.numPixels(); ++i){
        strip.setPixelColor(i, color);
   }
@@ -167,6 +164,10 @@ void start(){
 }
 
 void setup() {
+  strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800); 
+  strip.begin();
+  delay(400);
+  start();
   run_new_color = false;
   run_change_mode = false;
   Serial.begin(115200);
@@ -195,8 +196,7 @@ void setup() {
   ChangeModeList::prepare_list();
   LedModeList::prepare_list();
   Serial.println("Watiing for strip");
-  strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800); 
-  strip.begin();
+
   delay(400);
   is_started = false;
   randomSeed(analogRead(0));
@@ -206,8 +206,8 @@ void setup() {
 void loop() {
   server.handleClient();
   if (!is_started){
-     start();
-     is_started = true;
+    currentFunction = LedModeList::get_change_function_by_ID(4).value();
+    is_started = true;
   }
   std::map<int, uint32_t> led_result_map = currentFunction(current_red_value,current_blue_value,current_green_value,strip.numPixels());
   if(led_result_map.size() > 0 ){
@@ -226,5 +226,6 @@ void loop() {
   if (run_new_color){
     set_color(current_red_value, current_green_value, current_blue_value);
     run_new_color = false;
+    LedConfig::set_old_values(current_red_value,current_green_value,current_blue_value);
   }
 }
