@@ -100,8 +100,6 @@ std::optional<ClientRequest> get_object_from_json() {
 void handle_new_color_endpoint(){
   std::optional<ClientRequest> clientRequestOptional = get_object_from_json();
   if (clientRequestOptional.has_value()) {
-      // int* old_vlaue = LedConfig::get_old_value();
-      // LedConfig::set_old_values(old_vlaue[0],old_vlaue[1],old_vlaue[2]);
       ClientRequest clientRequest = clientRequestOptional.value();
       currentFunction = empty;
       current_red_value = clientRequest.get_red_value();
@@ -141,7 +139,7 @@ void run_led_mode(){
         current_blue_value = clientRequest.get_blue_value();
         current_green_value = clientRequest.get_green_value();
       }
-    LedConfig::set_old_values(current_red_value,current_green_value,current_blue_value);
+    LedConfig::set_old_values(current_red_value,current_blue_value,current_green_value);
     clientRequestOptional = std::nullopt; 
     } 
 }
@@ -215,7 +213,7 @@ void loop() {
   }
 
   if (run_change_mode){
-  std::map<int, uint32_t> change_result_map = current_change_mode_function(current_red_value,current_green_value,current_blue_value,strip.numPixels());
+  std::map<int, uint32_t> change_result_map = current_change_mode_function(current_red_value,current_blue_value,current_green_value,strip.numPixels());
     if (change_result_map.size() <= 0){
       run_change_mode = false;
       run_new_color = true; 
@@ -224,8 +222,8 @@ void loop() {
   }
 
   if (run_new_color){
-    set_color(current_red_value, current_green_value, current_blue_value);
+    set_color(current_red_value,current_blue_value, current_green_value );
     run_new_color = false;
-    LedConfig::set_old_values(current_red_value,current_green_value,current_blue_value);
+    LedConfig::set_old_values(current_red_value,current_blue_value,current_green_value);
   }
 }
